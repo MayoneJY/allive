@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 const Dashboard = () => {
     const [streamsTW, setStreamsTW] = useState([]);
     const [streamsCZZ, setStreamsCZZ] = useState([]);
     const [addStreams, setAddStreams] = useState([]);
+    // const streamRef = useRef();
+    const [showOverlay, setShowOverlay] = useState(null);
     useEffect(() => {
         const fetchStreams = async () => {
             try {
@@ -29,7 +31,8 @@ const Dashboard = () => {
                         user_id: stream.user_id,
                         title: stream.title,
                         game_name: stream.game_name,
-                        viewer_count: stream.viewer_count
+                        viewer_count: stream.viewer_count,
+                        url: "https://www.twitch.tv/" + stream.user_login
                     });
                 }
                 
@@ -70,10 +73,12 @@ const Dashboard = () => {
                         profile_image_url: stream.channel.channelImageUrl,
                         user_name: stream.channel.channelName,
                         title: stream.liveTitle,
-                        game_name: stream.liveCategory.replace('_',' '),
-                        viewer_count: stream.concurrentUserCount
+                        game_name: stream.liveCategory.replace(/_/g,' '),
+                        viewer_count: stream.concurrentUserCount,
+                        url: "https://chzzk.naver.com/live/" + stream.channel.channelId
                     });
                 }
+                console.log(response);
                 setStreamsCZZ(data);
             } catch (error) {
                 console.error('Error fetching streams:', error);
@@ -112,14 +117,48 @@ const Dashboard = () => {
         setAddStreams(data);
     }, [streamsTW, streamsCZZ]);
 
+    const clickEevet = (url) => {
+        // 새창 띄우기
+        window.open(url, '_blank');
+    };
+
+    const Overlay = ({platform, url}) => {
+        return (
+            <div className='position-absolute top-0 start-0 w-100 h-100 rounded'
+                style={{backgroundColor: "rgba(0,0,0,0.7)"}}
+                onMouseLeave={(e)=>{e.stopPropagation(); setShowOverlay(null)}}
+                >
+                <div className='d-flex align-items-center h-100'>
+                    {platform.includes('twitch') && 
+                        <div className={`h-100 ${platform.length > 1 ? 'w-50':'w-100'} d-flex justify-content-center align-items-center`}
+                            style={{cursor:"pointer"}}
+                            onClick={()=>{clickEevet(url)}}>
+                            <img className='opacity-50' src='/twitch.png' alt='twitch' width='50px' height='50px'/>
+                        </div>
+                    }
+                    {platform.includes('chzzk') && 
+                        <div className={`h-100 ${platform.length > 1 ? 'w-50':'w-100'} d-flex justify-content-center align-items-center`}
+                            style={{cursor:"pointer"}}
+                            onClick={()=>{clickEevet(url)}}>
+                            <img className='opacity-50' src='/chzzk.png' alt='chzzk' width='50px' height='50px'/>
+                        </div>
+                    }
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className='container'>
+            <div className='mb-5' style={{ display: "flex", justifyContent: "center" }}>
+                <img src='allive_log.png' alt='allive'/>
+            </div>
             <div className='row'>
                 {addStreams.map(stream => (
                     <div key={stream.id} className='col-3 mb-3'>
                         
                         <div class="card border-0 bg-dark">
-                            <div className='position-relative rounded'>
+                            <div className='position-relative rounded' onMouseEnter={(e)=>{e.stopPropagation(); setShowOverlay(stream.id)}}>
                                 <img src={stream.thumbnail_url} className="card-img-top rounded" alt={stream.user_name}/>
                                 <div className='position-absolute top-0 start-0 m-2'>
                                     <div className='d-flex align-items-center'>
@@ -135,12 +174,13 @@ const Dashboard = () => {
                                     {stream.platform.includes('twitch') && <img className='ms-1' src='/twitch.png' alt='twitch' width='20px' height='20px'/>}
                                     {stream.platform.includes('chzzk') && <img className='ms-1' src='/chzzk.png' alt='twitch' width='20px' height='20px'/>}
                                 </div>
+                                {stream.id === showOverlay && (<Overlay platform={stream.platform} url={stream.url}/>)}
                             </div>
                             
-                            <div class="card-body text-light" style={{fontSize:"12px"}}>
+                            <div class="card-body text-light p-2 ps-0" style={{fontSize:"12px"}}>
                                 <div className='d-flex'>
                                     <div>
-                                        <img className='rounded-pill' src={stream.profile_image_url} alt={stream.user_name} width='30px' height='30px'/>
+                                        <img className='rounded-pill' src={stream.profile_image_url} alt={stream.user_name} width='40px' height='40px'/>
                                     </div>
                                     <div className='ms-2'>
                                         <p className='m-0 fw-bold'>{stream.title}</p>
@@ -150,7 +190,6 @@ const Dashboard = () => {
                                 </div>
                             </div>
                         </div>
-                        {/* 여기에 더 많은 스트림 정보를 렌더링할 수 있습니다 */}
                     </div>
                 ))}
             </div>
