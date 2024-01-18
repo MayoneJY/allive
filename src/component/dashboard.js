@@ -5,8 +5,9 @@ const Dashboard = () => {
     const [streamsTW, setStreamsTW] = useState([]);
     const [streamsCZZ, setStreamsCZZ] = useState([]);
     const [addStreams, setAddStreams] = useState([]);
-    // const streamRef = useRef();
+    
     const [showOverlay, setShowOverlay] = useState(null);
+    const [overIcon, setOverIcon] = useState(null);
     useEffect(() => {
         const fetchStreams = async () => {
             try {
@@ -17,7 +18,7 @@ const Dashboard = () => {
                     'Authorization': `Bearer ${process.env.REACT_APP_TWITCH_CLIENT_TOKEN}`
                 },
                 params: {
-                    first: 20,
+                    first: 30,
                     language : 'ko'
                 }
                 });
@@ -32,7 +33,7 @@ const Dashboard = () => {
                         title: stream.title,
                         game_name: stream.game_name,
                         viewer_count: stream.viewer_count,
-                        url: "https://www.twitch.tv/" + stream.user_login
+                        url: {twitch: "https://www.twitch.tv/" + stream.user_login}
                     });
                 }
                 
@@ -75,7 +76,7 @@ const Dashboard = () => {
                         title: stream.liveTitle,
                         game_name: stream.liveCategory.replace(/_/g,' '),
                         viewer_count: stream.concurrentUserCount,
-                        url: "https://chzzk.naver.com/live/" + stream.channel.channelId
+                        url: {chzzk: "https://chzzk.naver.com/live/" + stream.channel.channelId}
                     });
                 }
                 console.log(response);
@@ -102,11 +103,13 @@ const Dashboard = () => {
                 if (data[i].user_name.replace(/ /g,'').includes(data[j].user_name.replace(/ /g,''))) {
                     data[i].viewer_count = (parseInt(data[i].viewer_count) + parseInt(data[j].viewer_count));
                     data[i].platform.push(data[j].platform[0]);
+                    data[i].url = {...data[i].url, ...data[j].url};
                     data.splice(j,1);
                 }
                 else if (data[j].user_name.replace(/ /g,'').includes(data[i].user_name.replace(/ /g,''))) {
                     data[i].viewer_count = (parseInt(data[i].viewer_count) + parseInt(data[j].viewer_count));
                     data[i].platform.push(data[j].platform[0]);
+                    data[i].url = {...data[i].url, ...data[j].url};
                     data.splice(j,1);
                 }
             }
@@ -129,20 +132,30 @@ const Dashboard = () => {
                 onMouseLeave={(e)=>{e.stopPropagation(); setShowOverlay(null)}}
                 >
                 <div className='d-flex align-items-center h-100'>
-                    {platform.includes('twitch') && 
+                    {platform.map((p, index) => (
                         <div className={`h-100 ${platform.length > 1 ? 'w-50':'w-100'} d-flex justify-content-center align-items-center`}
                             style={{cursor:"pointer"}}
-                            onClick={()=>{clickEevet(url)}}>
-                            <img className='opacity-50' src='/twitch.png' alt='twitch' width='50px' height='50px'/>
+                            onClick={(e)=>{e.stopPropagation(); clickEevet(url[p]);}}
+                            onMouseEnter={(e)=>{e.stopPropagation(); setOverIcon(p)}}>
+                            <img className={`opacity-${overIcon === p?"100":"50"}`} src={`/${p}.png`} alt={p} width='50px' height='50px'/>
+                        </div>
+                    ))}
+                    {/* {platform.includes('twitch') && 
+                        <div className={`h-100 ${platform.length > 1 ? 'w-50':'w-100'} d-flex justify-content-center align-items-center`}
+                            style={{cursor:"pointer"}}
+                            onClick={(e)=>{e.stopPropagation(); clickEevet(url[count]); setCount(count+1);}}
+                            onMouseEnter={(e)=>{e.stopPropagation(); setOverIcon("twitch")}}>
+                            <img className={`opacity-${overIcon === "twitch"?"100":"50"}`} src='/twitch.png' alt='twitch' width='50px' height='50px'/>
                         </div>
                     }
                     {platform.includes('chzzk') && 
                         <div className={`h-100 ${platform.length > 1 ? 'w-50':'w-100'} d-flex justify-content-center align-items-center`}
                             style={{cursor:"pointer"}}
-                            onClick={()=>{clickEevet(url)}}>
-                            <img className='opacity-50' src='/chzzk.png' alt='chzzk' width='50px' height='50px'/>
+                            onClick={(e)=>{e.stopPropagation(); clickEevet(url[count]); setCount(count+1);}}
+                            onMouseEnter={(e)=>{e.stopPropagation(); setOverIcon("chzzk")}}>
+                            <img className={`opacity-${overIcon === "chzzk"?"100":"50"}`} src='/chzzk.png' alt='chzzk' width='50px' height='50px'/>
                         </div>
-                    }
+                    } */}
                 </div>
             </div>
         );
