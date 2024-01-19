@@ -63,8 +63,7 @@ const Dashboard = () => {
 
         const fetchStreamsCzz = async () => {
             try {
-                
-                const response = await axios.get('service/v1/lives');
+                const response = await axios.get('https://api.mayonedev.com/chzzk');
                 const data = [];
                 for (const stream of response.data.content.data) {
                     data.push({
