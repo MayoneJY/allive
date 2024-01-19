@@ -99,13 +99,15 @@ const Dashboard = () => {
         
         for (let i = 0; i < data.length; i++) {
             for (let j = i+1; j < data.length; j++) {
-                if (data[i].user_name.replace(/ /g,'').includes(data[j].user_name.replace(/ /g,''))) {
+                if (data[i].user_name.replace(/ /g,'').includes(data[j].user_name.replace(/ /g,'')) ||
+                    data[i].title.includes(data[j].title)) {
                     data[i].viewer_count = (parseInt(data[i].viewer_count) + parseInt(data[j].viewer_count));
                     data[i].platform.push(data[j].platform[0]);
                     data[i].url = {...data[i].url, ...data[j].url};
                     data.splice(j,1);
                 }
-                else if (data[j].user_name.replace(/ /g,'').includes(data[i].user_name.replace(/ /g,''))) {
+                else if (data[j].user_name.replace(/ /g,'').includes(data[i].user_name.replace(/ /g,'')) ||
+                    data[j].title.includes(data[i].title)) {
                     data[i].viewer_count = (parseInt(data[i].viewer_count) + parseInt(data[j].viewer_count));
                     data[i].platform.push(data[j].platform[0]);
                     data[i].url = {...data[i].url, ...data[j].url};
