@@ -69,7 +69,7 @@ const Dashboard = () => {
                     data.push({
                         id: stream.liveId,
                         platform: ['chzzk'],
-                        thumbnail_url: stream.liveImageUrl.replace('{type}','270'),
+                        thumbnail_url: stream.liveImageUrl ? stream.liveImageUrl.replace('{type}','270') : null,
                         profile_image_url: stream.channel.channelImageUrl,
                         user_name: stream.channel.channelName,
                         title: stream.liveTitle,
@@ -78,7 +78,6 @@ const Dashboard = () => {
                         url: {chzzk: "https://chzzk.naver.com/live/" + stream.channel.channelId}
                     });
                 }
-                console.log(response);
                 setStreamsCZZ(data);
             } catch (error) {
                 console.error('Error fetching streams:', error);
@@ -102,8 +101,6 @@ const Dashboard = () => {
                 if (data[i].user_name.replace(/ /g,'').includes(data[j].user_name.replace(/ /g,''))
                     || data[j].user_name.replace(/ /g,'').includes(data[i].user_name.replace(/ /g,''))
                     || data[i].title === data[j].title) {
-                    console.log(data[i], data[j]);
-                    // ) {
                     data[i].viewer_count = (parseInt(data[i].viewer_count) + parseInt(data[j].viewer_count));
                     data[i].platform.push(data[j].platform[0]);
                     data[i].url = {...data[i].url, ...data[j].url};
@@ -169,7 +166,11 @@ const Dashboard = () => {
                         
                         <div class="card border-0 bg-dark">
                             <div className='position-relative rounded' onMouseEnter={(e)=>{e.stopPropagation(); setShowOverlay(stream.id)}}>
-                                <img src={stream.thumbnail_url} className="card-img-top rounded" alt={stream.user_name}/>
+                                {stream.thumbnail_url ? (
+                                    <img src={stream.thumbnail_url} className="card-img-top rounded" alt={stream.user_name}/>
+                                ) : (
+                                    <div className="card-img-top rounded bg-black" style={{ height: "166.5px" }}></div>
+                                )}
                                 <div className='position-absolute top-0 start-0 m-2'>
                                     <div className='d-flex align-items-center'>
                                         <div className='p-1 text-bg-danger rounded fw-bold' style={{fontSize: "12px"}}>
