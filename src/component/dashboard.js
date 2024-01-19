@@ -161,11 +161,11 @@ const Dashboard = () => {
     return (
         <div className='container'>
             <div className='mb-5' style={{ display: "flex", justifyContent: "center" }}>
-                <img src='allive_log.png' alt='allive'/>
+                <img src='allive_log.png' alt='allive' style={{ maxWidth: "100%", maxHeight: "100%" }}/>
             </div>
-            <div className='row'>
+            <div className='row row-cols-auto justify-content-center'>
                 {addStreams.map(stream => (
-                    <div key={stream.id} className='col-3 mb-3'>
+                    <div key={stream.id} className='col mb-3' style={{width: "320px"}}>
                         
                         <div class="card border-0 bg-dark">
                             <div className='position-relative rounded' onMouseEnter={(e)=>{e.stopPropagation(); setShowOverlay(stream.id)}}>
