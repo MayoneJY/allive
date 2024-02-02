@@ -145,12 +145,12 @@ const Dashboard = () => {
             }
             localStorage.setItem('search', JSON.stringify(result));
             setSearch([].concat(result));
-            console.log(search)
         }
     };
 
     const handleAutoSave = () => {
-        if (!autoSave) {
+        if (autoSave) {
+            setSearch([]);
             localStorage.removeItem('search');
         }
         setAutoSave(!autoSave);
@@ -206,7 +206,7 @@ const Dashboard = () => {
         return (
             <div className='position-absolute top-0 start-0 w-100 rounded-4 bg-dark lineasd rounded shadow-lg'
                 style={{minHeight: "300px", zIndex: "1", marginTop: "45px"}}
-                onMouseEnter={()=>{setFocusRecentSearch(true); console.log(1);}} onMouseLeave={()=>{setFocusRecentSearch(false); console.log(2);}}
+                onMouseEnter={()=>{setFocusRecentSearch(true)}} onMouseLeave={()=>{setFocusRecentSearch(false)}}
                 >
                 <div className='m-2'>
                     {search.length > 0 ? 
