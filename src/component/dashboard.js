@@ -8,10 +8,11 @@ const Dashboard = () => {
     
     const [showOverlay, setShowOverlay] = useState(null);
     const [overIcon, setOverIcon] = useState(null);
+
+    const [focusSearch, setFocusSearch] = useState(false);
     useEffect(() => {
         const fetchStreams = async () => {
             try {
-                
                 const response = await axios.get('https://api.twitch.tv/helix/streams', {
                 headers: {
                     'Client-ID': process.env.REACT_APP_TWITCH_CLIENT_ID,
@@ -155,10 +156,41 @@ const Dashboard = () => {
         );
     };
 
+    // 최근 검색 내역
+    const ViewRecentSearch = () => {
+        return (
+            <div className='position-absolute top-0 start-0 w-100 rounded-4 bg-dark border border-light border-opacity-50 rounded shadow-lg'
+                style={{height: "300px", zIndex: "1", marginTop: "45px"}}
+                onMouseLeave={(e)=>{e.stopPropagation(); setShowOverlay(null)}}
+                >
+                <div className='d-flex align-items-center h-100'>
+                    <div className='h-100 w-100 d-flex justify-content-center align-items-center'>
+                        <div className='text-light'>
+                            최근 검색 내역
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className='container'>
-            <div className='mb-5' style={{ display: "flex", justifyContent: "center" }}>
+            <div className='mb-2 d-flex justify-content-center'>
                 <img src='allive_log.png' alt='allive' style={{ maxWidth: "100%", maxHeight: "100%" }}/>
+            </div>
+            <div className="input-group mb-5 d-flex justify-content-center">
+                <div className={`position-relative border rounded-pill d-flex justify-content-center ${focusSearch?"border-light border-opacity-50":"border-light border-opacity-25"}`}
+                    style={{width: "400px", height: "40px", maxWidth: "100%", maxHeight: "100%" }}>
+                    <input type="text" className="search-input bg-dark d-inline ms-3" placeholder="검색어를 입력하세요" name="search"
+                        style={{width:"330px"}}
+                        onClick={()=>{setFocusSearch(true)}}
+                        onBlur={()=>{setFocusSearch(false)}}/>
+                    <div class="input-group-append d-inline">
+                        <button type="submit" className="bg-dark border-0 text-white h-100 rounded-pill material-symbols-outlined opacity-50">search</button>
+                    </div>
+                    {focusSearch && <ViewRecentSearch/>}
+                </div>
             </div>
             <div className='row row-cols-auto justify-content-center'>
                 {addStreams.map(stream => (
