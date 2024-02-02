@@ -20,3 +20,14 @@ code {
   border: none;
   color: white;
 }
+
+.lineasd {
+  
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background-color: rgba(0,0,0,0);
+  background-image: linear-gradient(rgb(34, 37, 41), rgb(34, 37, 41)), 
+  linear-gradient(to right, rgba(0, 110, 255,.5) 0%,  rgba(170, 255, 0,.5) 100%);
+  background-origin: border-box;
+  background-clip: content-box, border-box;
+}

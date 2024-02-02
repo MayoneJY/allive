@@ -159,7 +159,7 @@ const Dashboard = () => {
     // 최근 검색 내역
     const ViewRecentSearch = () => {
         return (
-            <div className='position-absolute top-0 start-0 w-100 rounded-4 bg-dark border border-light border-opacity-50 rounded shadow-lg'
+            <div className='position-absolute top-0 start-0 w-100 rounded-4 bg-dark lineasd rounded shadow-lg'
                 style={{height: "300px", zIndex: "1", marginTop: "45px"}}
                 onMouseLeave={(e)=>{e.stopPropagation(); setShowOverlay(null)}}
                 >
@@ -179,8 +179,11 @@ const Dashboard = () => {
             <div className='mb-2 d-flex justify-content-center'>
                 <img src='allive_log.png' alt='allive' style={{ maxWidth: "100%", maxHeight: "100%" }}/>
             </div>
+            {/* <div className='lineasd'>
+                border-light border-opacity-25
+            </div> */}
             <div className="input-group mb-5 d-flex justify-content-center">
-                <div className={`position-relative border rounded-pill d-flex justify-content-center ${focusSearch?"border-light border-opacity-50":"border-light border-opacity-25"}`}
+                <div className={`position-relative rounded-pill d-flex justify-content-center bg-dark ${focusSearch?"lineasd":"border border-secondary border-opacity-50"}`}
                     style={{width: "400px", height: "40px", maxWidth: "100%", maxHeight: "100%" }}>
                     <input type="text" className="search-input bg-dark d-inline ms-3" placeholder="검색어를 입력하세요" name="search"
                         style={{width:"330px"}}
