@@ -9,8 +9,11 @@ const Dashboard = () => {
     const [showOverlay, setShowOverlay] = useState(null);
     const [overIcon, setOverIcon] = useState(null);
 
-    const [focusSearch, setFocusSearch] = useState(true);
+    const [focusSearch, setFocusSearch] = useState(false);
     const [search, setSearch] = useState(localStorage.getItem('search') ? JSON.parse(localStorage.getItem('search')) : []);
+    const [autoSave, setAutoSave] = useState(true);
+    const [focusRecentSearch, setFocusRecentSearch] = useState(false);
+    const refSearch = useRef(null);
 
     useEffect(() => {
         const fetchStreams = async () => {
@@ -146,6 +149,22 @@ const Dashboard = () => {
         }
     };
 
+    const handleAutoSave = () => {
+        if (!autoSave) {
+            localStorage.removeItem('search');
+        }
+        setAutoSave(!autoSave);
+    };
+
+    const handleBlurSearch = () => {
+        if (!focusRecentSearch) {
+            setFocusSearch(false);
+        }
+        else {
+            refSearch.current.focus();
+        }
+    };
+
     const Overlay = ({platform, url}) => {
         return (
             <div className='position-absolute top-0 start-0 w-100 h-100 rounded'
@@ -187,7 +206,7 @@ const Dashboard = () => {
         return (
             <div className='position-absolute top-0 start-0 w-100 rounded-4 bg-dark lineasd rounded shadow-lg'
                 style={{minHeight: "300px", zIndex: "1", marginTop: "45px"}}
-                onMouseLeave={(e)=>{e.stopPropagation(); setShowOverlay(null)}}
+                onMouseEnter={()=>{setFocusRecentSearch(true); console.log(1);}} onMouseLeave={()=>{setFocusRecentSearch(false); console.log(2);}}
                 >
                 <div className='m-2'>
                     {search.length > 0 ? 
@@ -195,10 +214,10 @@ const Dashboard = () => {
                             <div>
                                 <div className='text-white-50 m-2 d-flex justify-content-between'>
                                     <div className=''
-                                        style={{fontSize:"12px"}}>
+                                        style={{fontSize:"12px", cursor: "default"}}>
                                         최근 검색어
                                     </div>
-                                    <div style={{fontSize:"12px"}}>
+                                    <div style={{fontSize:"12px", cursor: "pointer"}}>
                                         전체 삭제
                                     </div>
                                 </div>
@@ -208,14 +227,14 @@ const Dashboard = () => {
                                             <tr>
                                                 <td>
                                                     <span className="material-symbols-outlined text-white-50"
-                                                        style={{fontSize: "13px"}}>schedule</span>
+                                                        style={{fontSize: "14px", cursor: "default"}}>schedule</span>
                                                 </td>
-                                                <td className='align-middle text-white-50 w-100' style={{fontSize: "13px"}}>
+                                                <td className='text-white-50 w-100' style={{fontSize: "13px", cursor: "default"}}>
                                                     {s}
                                                 </td>
                                                 <td>
                                                     <span class="material-symbols-outlined text-white-50"
-                                                        style={{fontSize: "13px"}}>
+                                                        style={{fontSize: "14px", cursor: "pointer"}}>
                                                         close
                                                     </span>
                                                 </td>
@@ -228,15 +247,24 @@ const Dashboard = () => {
                     (
                     <div className='d-flex align-items-center h-100'>
                         <div className='h-100 w-100 d-flex justify-content-center align-items-center'>
-                            <div className='text-white-50'>
+                            <div className='text-white-50' style={{cursor: "default"}}>
                                 최근 검색이 없습니다.
                             </div>
                         </div>
                     </div>
                     )}
                     <div className='position-absolute bottom-0 end-0 align-text-bottom text-white-50 m-2 me-3'
-                        style={{fontSize: "12px"}}>
-                        자동저장 끄기
+                        style={{fontSize: "12px", cursor: "pointer"}}
+                        onClick={handleAutoSave}>
+                        {autoSave ? (
+                            <>
+                                자동저장 끄기
+                            </>
+                        ) : (
+                            <>
+                                자동저장 켜기
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
@@ -257,8 +285,9 @@ const Dashboard = () => {
                     <input type="text" className="search-input bg-dark d-inline ms-3" placeholder="검색어를 입력하세요" name="search"
                         style={{width:"330px"}}
                         onClick={()=>{setFocusSearch(true)}}
-                        onBlur={()=>{setFocusSearch(false)}}
-                        onKeyDown={handleEnterSearch}/>
+                        onBlur={handleBlurSearch}
+                        onKeyDown={handleEnterSearch}
+                        ref={refSearch}/>
                     <div class="input-group-append d-inline">
                         <button type="submit" className="bg-dark border-0 text-white h-100 rounded-pill material-symbols-outlined opacity-50">search</button>
                     </div>
