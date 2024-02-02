@@ -79,7 +79,7 @@ const Dashboard = () => {
                         profile_image_url: stream.channel.channelImageUrl,
                         user_name: stream.channel.channelName,
                         title: stream.liveTitle,
-                        game_name: stream.liveCategory.replace(/_/g,' '),
+                        game_name: (''+stream.liveCategory).replace(/_/g,' '),
                         viewer_count: stream.concurrentUserCount,
                         url: {chzzk: "https://chzzk.naver.com/live/" + stream.channel.channelId}
                     });
