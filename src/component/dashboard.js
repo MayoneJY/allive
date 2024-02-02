@@ -9,7 +9,9 @@ const Dashboard = () => {
     const [showOverlay, setShowOverlay] = useState(null);
     const [overIcon, setOverIcon] = useState(null);
 
-    const [focusSearch, setFocusSearch] = useState(false);
+    const [focusSearch, setFocusSearch] = useState(true);
+    const [search, setSearch] = useState(localStorage.getItem('search') ? JSON.parse(localStorage.getItem('search')) : []);
+
     useEffect(() => {
         const fetchStreams = async () => {
             try {
@@ -119,6 +121,30 @@ const Dashboard = () => {
         // 새창 띄우기
         window.open(url, '_blank');
     };
+    
+    const handleEnterSearch = (e) => {
+        if (e.key === 'Enter') {
+            if(e.target.value === '') return;
+            let result = search;
+            result.unshift(e.target.value);
+            // 중복이면 0 인덱스로 변경
+            if (result.length > 1) {
+                for (let i = 1; i < result.length; i++) {
+                    if (result[0] === result[i]) {
+                        // 중복 제거
+                        result.splice(i,1);
+                    }
+                }
+            }
+            // 10개 제한
+            if (result.length > 10) {
+                result.pop();
+            }
+            localStorage.setItem('search', JSON.stringify(result));
+            setSearch([].concat(result));
+            console.log(search)
+        }
+    };
 
     const Overlay = ({platform, url}) => {
         return (
@@ -160,14 +186,57 @@ const Dashboard = () => {
     const ViewRecentSearch = () => {
         return (
             <div className='position-absolute top-0 start-0 w-100 rounded-4 bg-dark lineasd rounded shadow-lg'
-                style={{height: "300px", zIndex: "1", marginTop: "45px"}}
+                style={{minHeight: "300px", zIndex: "1", marginTop: "45px"}}
                 onMouseLeave={(e)=>{e.stopPropagation(); setShowOverlay(null)}}
                 >
-                <div className='d-flex align-items-center h-100'>
-                    <div className='h-100 w-100 d-flex justify-content-center align-items-center'>
-                        <div className='text-light'>
-                            최근 검색 내역
+                <div className='m-2'>
+                    {search.length > 0 ? 
+                        (
+                            <div>
+                                <div className='text-white-50 m-2 d-flex justify-content-between'>
+                                    <div className=''
+                                        style={{fontSize:"12px"}}>
+                                        최근 검색어
+                                    </div>
+                                    <div style={{fontSize:"12px"}}>
+                                        전체 삭제
+                                    </div>
+                                </div>
+                                <table className='table table-dark table-hover table-borderless rounded rounded-4 mb-4'>
+                                    <tbody>
+                                        {search.map((s, index) => (
+                                            <tr>
+                                                <td>
+                                                    <span className="material-symbols-outlined text-white-50"
+                                                        style={{fontSize: "13px"}}>schedule</span>
+                                                </td>
+                                                <td className='align-middle text-white-50 w-100' style={{fontSize: "13px"}}>
+                                                    {s}
+                                                </td>
+                                                <td>
+                                                    <span class="material-symbols-outlined text-white-50"
+                                                        style={{fontSize: "13px"}}>
+                                                        close
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                    ):
+                    (
+                    <div className='d-flex align-items-center h-100'>
+                        <div className='h-100 w-100 d-flex justify-content-center align-items-center'>
+                            <div className='text-white-50'>
+                                최근 검색이 없습니다.
+                            </div>
                         </div>
+                    </div>
+                    )}
+                    <div className='position-absolute bottom-0 end-0 align-text-bottom text-white-50 m-2 me-3'
+                        style={{fontSize: "12px"}}>
+                        자동저장 끄기
                     </div>
                 </div>
             </div>
@@ -188,7 +257,8 @@ const Dashboard = () => {
                     <input type="text" className="search-input bg-dark d-inline ms-3" placeholder="검색어를 입력하세요" name="search"
                         style={{width:"330px"}}
                         onClick={()=>{setFocusSearch(true)}}
-                        onBlur={()=>{setFocusSearch(false)}}/>
+                        onBlur={()=>{setFocusSearch(false)}}
+                        onKeyDown={handleEnterSearch}/>
                     <div class="input-group-append d-inline">
                         <button type="submit" className="bg-dark border-0 text-white h-100 rounded-pill material-symbols-outlined opacity-50">search</button>
                     </div>
