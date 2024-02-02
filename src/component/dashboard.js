@@ -11,7 +11,7 @@ const Dashboard = () => {
 
     const [focusSearch, setFocusSearch] = useState(false);
     const [search, setSearch] = useState(localStorage.getItem('search') ? JSON.parse(localStorage.getItem('search')) : []);
-    const [autoSave, setAutoSave] = useState(true);
+    const [autoSave, setAutoSave] = useState(localStorage.getItem('autoSave') ? localStorage.getItem('autoSave') === 'true' : true);
     const [focusRecentSearch, setFocusRecentSearch] = useState(false);
     const refSearch = useRef(null);
 
@@ -153,6 +153,7 @@ const Dashboard = () => {
             setSearch([]);
             localStorage.removeItem('search');
         }
+        localStorage.setItem('autoSave', !autoSave);
         setAutoSave(!autoSave);
     };
 
@@ -248,7 +249,7 @@ const Dashboard = () => {
                     <div className='d-flex align-items-center h-100'>
                         <div className='h-100 w-100 d-flex justify-content-center align-items-center'>
                             <div className='text-white-50' style={{cursor: "default"}}>
-                                최근 검색이 없습니다.
+                                {autoSave ? (<>최근 검색이 없습니다.</>) : (<>자동저장이 꺼져있습니다.</>)}
                             </div>
                         </div>
                     </div>
