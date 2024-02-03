@@ -14,14 +14,13 @@ const Dashboard = () => {
     const [autoSave, setAutoSave] = useState(localStorage.getItem('autoSave') ? localStorage.getItem('autoSave') === 'true' : true);
     const [focusRecentSearch, setFocusRecentSearch] = useState(false);
     const refSearch = useRef(null);
-    const [valueSearch, setValueSearch] = useState('');
 
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
     const searchStream = async () => {
         // 검색어가 없으면 리턴
-        if (valueSearch === '') return;
+        if (refSearch.current.value === '') return;
         // console.log('검색어:', encodeURIComponent(valueSearch));
         // try{
         //     const response = await axios.get('https://api.twitch.tv/helix/search/channels', {
@@ -48,7 +47,7 @@ const Dashboard = () => {
                     'Authorization': `Bearer ${process.env.REACT_APP_TWITCH_CLIENT_TOKEN}`
                 },
                 params: {
-                    query: valueSearch,
+                    query: refSearch.current.value,
                     live_only: true
                 }
             });
@@ -233,6 +232,34 @@ const Dashboard = () => {
         navigate('/');
     };
 
+    const handleRecnetSearch = (value) => {
+        refSearch.current.value = value;
+        setFocusRecentSearch(false);
+        setFocusSearch(false);
+        setLoading(true);
+        if(value === '') return;
+        let result = search;
+        result.unshift(value);
+        // 중복이면 0 인덱스로 변경
+        if (result.length > 1) {
+            for (let i = 1; i < result.length; i++) {
+                if (result[0] === result[i]) {
+                    // 중복 제거
+                    result.splice(i,1);
+                }
+            }
+        }
+        // 10개 제한
+        if (result.length > 10) {
+            result.pop();
+        }
+        localStorage.setItem('search', JSON.stringify(result));
+        setSearch([].concat(result));
+        searchStream();
+        setTimeout(() => {
+            refSearch.current.blur();
+        }, 50);
+    }
 
     // 최근 검색 내역
     const ViewRecentSearch = () => {
@@ -257,7 +284,7 @@ const Dashboard = () => {
                                 <table className='table table-dark table-hover table-borderless rounded rounded-4 mb-4'>
                                     <tbody>
                                         {search.map((s, index) => (
-                                            <tr>
+                                            <tr onClick={()=>{handleRecnetSearch(s)}}>
                                                 <td>
                                                     <span className="material-symbols-outlined text-white-50"
                                                         style={{fontSize: "14px", cursor: "default"}}>schedule</span>
@@ -320,7 +347,6 @@ const Dashboard = () => {
                         onClick={()=>{setFocusSearch(true)}}
                         onBlur={handleBlurSearch}
                         onKeyDown={handleEnterSearch}
-                        onChange={(e)=>{setValueSearch(e.target.value)}}
                         ref={refSearch}
                         autocomplete='off'/>
                     <div class="input-group-append d-inline">
