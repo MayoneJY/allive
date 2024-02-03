@@ -261,6 +261,17 @@ const Dashboard = () => {
         }, 50);
     }
 
+    const handleDropRecentSearch = (value) => {
+        let result = search;
+        for (let i = 0; i < result.length; i++) {
+            if (result[i] === value) {
+                result.splice(i,1);
+            }
+        }
+        localStorage.setItem('search', JSON.stringify(result));
+        setSearch([].concat(result));
+    }
+
     // 최근 검색 내역
     const ViewRecentSearch = () => {
         return (
@@ -294,7 +305,8 @@ const Dashboard = () => {
                                                 </td>
                                                 <td>
                                                     <span class="material-symbols-outlined text-white-50"
-                                                        style={{fontSize: "14px", cursor: "pointer"}}>
+                                                        style={{fontSize: "14px", cursor: "pointer"}}
+                                                        onClick={(e)=>{e.stopPropagation();handleDropRecentSearch(s)}}>
                                                         close
                                                     </span>
                                                 </td>
