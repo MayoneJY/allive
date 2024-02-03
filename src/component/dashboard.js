@@ -321,7 +321,8 @@ const Dashboard = () => {
                         onBlur={handleBlurSearch}
                         onKeyDown={handleEnterSearch}
                         onChange={(e)=>{setValueSearch(e.target.value)}}
-                        ref={refSearch}/>
+                        ref={refSearch}
+                        autocomplete='off'/>
                     <div class="input-group-append d-inline">
                         <button type="submit" className="bg-dark border-0 text-white h-100 rounded-pill material-symbols-outlined opacity-50">search</button>
                     </div>
