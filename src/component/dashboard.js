@@ -1,19 +1,75 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import Streams from './streams';
 
 const Dashboard = () => {
     const [streamsTW, setStreamsTW] = useState([]);
     const [streamsCZZ, setStreamsCZZ] = useState([]);
     const [addStreams, setAddStreams] = useState([]);
     
-    const [showOverlay, setShowOverlay] = useState(null);
-    const [overIcon, setOverIcon] = useState(null);
 
     const [focusSearch, setFocusSearch] = useState(false);
     const [search, setSearch] = useState(localStorage.getItem('search') ? JSON.parse(localStorage.getItem('search')) : []);
     const [autoSave, setAutoSave] = useState(localStorage.getItem('autoSave') ? localStorage.getItem('autoSave') === 'true' : true);
     const [focusRecentSearch, setFocusRecentSearch] = useState(false);
     const refSearch = useRef(null);
+    const [valueSearch, setValueSearch] = useState('');
+
+    const searchStream = async () => {
+        // 검색어가 없으면 리턴
+        if (valueSearch === '') return;
+        // console.log('검색어:', encodeURIComponent(valueSearch));
+        // try{
+        //     const response = await axios.get('https://api.twitch.tv/helix/search/channels', {
+        //         headers: {
+        //             'Client-ID': process.env.REACT_APP_TWITCH_CLIENT_ID,
+        //             'Authorization': `Bearer ${process.env.REACT_APP_TWITCH_CLIENT_TOKEN}`
+        //         },
+        //         params: {
+        //             query: valueSearch,
+        //             live_only: true
+        //         }
+        //     });
+        //     console.log(response.data);
+
+        // }
+        // catch (error) {
+        //     console.error('Error fetching streams:', error);
+        // }
+        
+        try{
+            const response = await axios.get('https://api.twitch.tv/helix/search/channels', {
+                headers: {
+                    'Client-ID': process.env.REACT_APP_TWITCH_CLIENT_ID,
+                    'Authorization': `Bearer ${process.env.REACT_APP_TWITCH_CLIENT_TOKEN}`
+                },
+                params: {
+                    query: valueSearch,
+                    live_only: true
+                }
+            });
+            const data = [];
+            for (const stream of response.data.data) {
+                if (stream.broadcaster_language === 'ko' || stream.broadcaster_language === 'kr') {
+                    data.push({
+                        id: stream.id,
+                        platform: ['twitch'],
+                        thumbnail_url: stream.thumbnail_url.replace('{width}','480').replace('{height}','270'),
+                        user_name: stream.display_name,
+                        title: stream.title,
+                        game_name: stream.game_name,
+                        viewer_count: stream.viewer_count || 0,
+                    });
+                }
+            }
+            setStreamsTW(data);
+            // 현재는 트위치만 검색 가능
+            setStreamsCZZ([]);
+        }
+        catch (error) {
+            console.error('Error fetching streams:', error);
+        }
+    };
 
     useEffect(() => {
         const fetchStreams = async () => {
@@ -119,14 +175,10 @@ const Dashboard = () => {
 
         setAddStreams(data);
     }, [streamsTW, streamsCZZ]);
-
-    const clickEevet = (url) => {
-        // 새창 띄우기
-        window.open(url, '_blank');
-    };
     
     const handleEnterSearch = (e) => {
         if (e.key === 'Enter') {
+            setFocusSearch(false);
             if(e.target.value === '') return;
             let result = search;
             result.unshift(e.target.value);
@@ -145,6 +197,12 @@ const Dashboard = () => {
             }
             localStorage.setItem('search', JSON.stringify(result));
             setSearch([].concat(result));
+            e.target.parentNode.parentNode.focus();
+            e.target.parentNode.parentNode.blur();
+            searchStream();
+            setTimeout(() => {
+                e.target.blur();
+            }, 1);
         }
     };
 
@@ -166,41 +224,6 @@ const Dashboard = () => {
         }
     };
 
-    const Overlay = ({platform, url}) => {
-        return (
-            <div className='position-absolute top-0 start-0 w-100 h-100 rounded'
-                style={{backgroundColor: "rgba(0,0,0,0.7)"}}
-                onMouseLeave={(e)=>{e.stopPropagation(); setShowOverlay(null)}}
-                >
-                <div className='d-flex align-items-center h-100'>
-                    {platform.map((p, index) => (
-                        <div className={`h-100 ${platform.length > 1 ? 'w-50':'w-100'} d-flex justify-content-center align-items-center`}
-                            style={{cursor:"pointer"}}
-                            onClick={(e)=>{e.stopPropagation(); clickEevet(url[p]);}}
-                            onMouseEnter={(e)=>{e.stopPropagation(); setOverIcon(p)}}>
-                            <img className={`opacity-${overIcon === p?"100":"50"}`} src={`/${p}.png`} alt={p} width='50px' height='50px'/>
-                        </div>
-                    ))}
-                    {/* {platform.includes('twitch') && 
-                        <div className={`h-100 ${platform.length > 1 ? 'w-50':'w-100'} d-flex justify-content-center align-items-center`}
-                            style={{cursor:"pointer"}}
-                            onClick={(e)=>{e.stopPropagation(); clickEevet(url[count]); setCount(count+1);}}
-                            onMouseEnter={(e)=>{e.stopPropagation(); setOverIcon("twitch")}}>
-                            <img className={`opacity-${overIcon === "twitch"?"100":"50"}`} src='/twitch.png' alt='twitch' width='50px' height='50px'/>
-                        </div>
-                    }
-                    {platform.includes('chzzk') && 
-                        <div className={`h-100 ${platform.length > 1 ? 'w-50':'w-100'} d-flex justify-content-center align-items-center`}
-                            style={{cursor:"pointer"}}
-                            onClick={(e)=>{e.stopPropagation(); clickEevet(url[count]); setCount(count+1);}}
-                            onMouseEnter={(e)=>{e.stopPropagation(); setOverIcon("chzzk")}}>
-                            <img className={`opacity-${overIcon === "chzzk"?"100":"50"}`} src='/chzzk.png' alt='chzzk' width='50px' height='50px'/>
-                        </div>
-                    } */}
-                </div>
-            </div>
-        );
-    };
 
     // 최근 검색 내역
     const ViewRecentSearch = () => {
@@ -272,6 +295,7 @@ const Dashboard = () => {
         );
     };
 
+
     return (
         <div className='container'>
             <div className='mb-2 d-flex justify-content-center'>
@@ -283,11 +307,12 @@ const Dashboard = () => {
             <div className="input-group mb-5 d-flex justify-content-center">
                 <div className={`position-relative rounded-pill d-flex justify-content-center bg-dark ${focusSearch?"lineasd":"border border-secondary border-opacity-50"}`}
                     style={{width: "400px", height: "40px", maxWidth: "100%", maxHeight: "100%" }}>
-                    <input type="text" className="search-input bg-dark d-inline ms-3" placeholder="검색어를 입력하세요" name="search"
+                    <input type="text" className="search-input bg-dark d-inline ms-3" placeholder="현재 검색은 트위치만 가능합니다." name="search"
                         style={{width:"330px"}}
                         onClick={()=>{setFocusSearch(true)}}
                         onBlur={handleBlurSearch}
                         onKeyDown={handleEnterSearch}
+                        onChange={(e)=>{setValueSearch(e.target.value)}}
                         ref={refSearch}/>
                     <div class="input-group-append d-inline">
                         <button type="submit" className="bg-dark border-0 text-white h-100 rounded-pill material-symbols-outlined opacity-50">search</button>
@@ -296,48 +321,7 @@ const Dashboard = () => {
                 </div>
             </div>
             <div className='row row-cols-auto justify-content-center'>
-                {addStreams.map(stream => (
-                    <div key={stream.id} className='col mb-3' style={{width: "320px"}}>
-                        
-                        <div class="card border-0 bg-dark">
-                            <div className='position-relative rounded' onMouseEnter={(e)=>{e.stopPropagation(); setShowOverlay(stream.id)}}>
-                                {stream.thumbnail_url ? (
-                                    <img src={stream.thumbnail_url} className="card-img-top rounded" alt={stream.user_name}/>
-                                ) : (
-                                    <div className="card-img-top rounded bg-black" style={{ height: "166.5px" }}></div>
-                                )}
-                                <div className='position-absolute top-0 start-0 m-2'>
-                                    <div className='d-flex align-items-center'>
-                                        <div className='p-1 text-bg-danger rounded fw-bold' style={{fontSize: "12px"}}>
-                                            LIVE
-                                        </div>
-                                        <div className='p-1 bg-dark rounded ms-1 text-light' style={{fontSize: "12px"}}>
-                                            {stream.viewer_count.toLocaleString()} 시청
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className='position-absolute top-0 end-0 m-2'>
-                                    {stream.platform.includes('twitch') && <img className='ms-1' src='/twitch.png' alt='twitch' width='20px' height='20px'/>}
-                                    {stream.platform.includes('chzzk') && <img className='ms-1' src='/chzzk.png' alt='twitch' width='20px' height='20px'/>}
-                                </div>
-                                {stream.id === showOverlay && (<Overlay platform={stream.platform} url={stream.url}/>)}
-                            </div>
-                            
-                            <div class="card-body text-light p-2 ps-0" style={{fontSize:"12px"}}>
-                                <div className='d-flex'>
-                                    <div>
-                                        <img className='rounded-pill' src={stream.profile_image_url} alt={stream.user_name} width='40px' height='40px'/>
-                                    </div>
-                                    <div className='ms-2'>
-                                        <p className='m-0 fw-bold'>{stream.title}</p>
-                                        <p className='m-0 text-white-50'>{stream.user_name}</p>
-                                        <p className='m-0 text-white-50'>{stream.game_name}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                ))}
+                <Streams streams={addStreams} />
             </div>
         </div>
     );
