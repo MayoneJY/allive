@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
-function Streams({streams}) {
+function Streams({streams, loading, setLoading}) {
     const [showOverlay, setShowOverlay] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [overIcon, setOverIcon] = useState(null);
 
     useEffect(() => {
@@ -11,7 +10,7 @@ function Streams({streams}) {
         }, 5000);
 
         return () => clearTimeout(timer); // 컴포넌트 unmount 시 타이머 해제
-    }, []);
+    }, [, loading]);
 
 
     const clickEevet = (url) => {

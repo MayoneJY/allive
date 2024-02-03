@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Streams from './streams';
 
@@ -14,6 +15,9 @@ const Dashboard = () => {
     const [focusRecentSearch, setFocusRecentSearch] = useState(false);
     const refSearch = useRef(null);
     const [valueSearch, setValueSearch] = useState('');
+
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     const searchStream = async () => {
         // 검색어가 없으면 리턴
@@ -179,6 +183,7 @@ const Dashboard = () => {
     const handleEnterSearch = (e) => {
         if (e.key === 'Enter') {
             setFocusSearch(false);
+            setLoading(true);
             if(e.target.value === '') return;
             let result = search;
             result.unshift(e.target.value);
@@ -222,6 +227,10 @@ const Dashboard = () => {
         else {
             refSearch.current.focus();
         }
+    };
+
+    const handleHomeIcon = () => {
+        navigate('/');
     };
 
 
@@ -299,11 +308,10 @@ const Dashboard = () => {
     return (
         <div className='container'>
             <div className='mb-2 d-flex justify-content-center'>
-                <img src='allive_log.png' alt='allive' style={{ maxWidth: "100%", maxHeight: "100%" }}/>
+                <img src='allive_log.png' alt='allive' 
+                    style={{ maxWidth: "100%", maxHeight: "100%", cursor: "pointer"}}
+                    onClick={handleHomeIcon}/>
             </div>
-            {/* <div className='lineasd'>
-                border-light border-opacity-25
-            </div> */}
             <div className="input-group mb-5 d-flex justify-content-center">
                 <div className={`position-relative rounded-pill d-flex justify-content-center bg-dark ${focusSearch?"lineasd":"border border-secondary border-opacity-50"}`}
                     style={{width: "400px", height: "40px", maxWidth: "100%", maxHeight: "100%" }}>
@@ -321,7 +329,7 @@ const Dashboard = () => {
                 </div>
             </div>
             <div className='row row-cols-auto justify-content-center'>
-                <Streams streams={addStreams} />
+                <Streams streams={addStreams} loading={loading} setLoading={setLoading} />
             </div>
         </div>
     );
