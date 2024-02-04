@@ -107,6 +107,7 @@ function Streams({streams, loading, setLoading}) {
                                 <div className='position-absolute top-0 end-0 m-2'>
                                     {stream.platform.includes('twitch') && <img className='ms-1' src='/twitch.png' alt='twitch' width='20px' height='20px'/>}
                                     {stream.platform.includes('chzzk') && <img className='ms-1' src='/chzzk.png' alt='twitch' width='20px' height='20px'/>}
+                                    {stream.platform.includes('afreeca') && <img className='ms-1' src='/afreeca.png' alt='afreeca' width='20px' height='20px'/>}
                                 </div>
                                 {stream.id === showOverlay && (<Overlay platform={stream.platform} url={stream.url}/>)}
                             </div>

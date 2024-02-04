@@ -6,6 +6,7 @@ import Streams from './streams';
 const Dashboard = () => {
     const [streamsTW, setStreamsTW] = useState([]);
     const [streamsCZZ, setStreamsCZZ] = useState([]);
+    const [streamsAfreeca, setStreamsAfreeca] = useState([]);
     const [addStreams, setAddStreams] = useState([]);
     
 
@@ -172,25 +173,50 @@ const Dashboard = () => {
                 // 에러 처리 로직을 추가하세요.
             }
         };
+        
+        const fetchStreamsAfreeca = async () => {
+            try {
+                const response = await axios.get('https://api.mayonedev.com/afreeca');
+                const data = [];
+                for (const stream of response.data) {
+                    data.push({
+                        id: stream.id,
+                        platform: ['afreeca'],
+                        thumbnail_url: stream.thumbnail_url,
+                        profile_image_url: stream.profile_image_url,
+                        user_name: stream.user_name,
+                        title: stream.title,
+                        game_name: '',
+                        viewer_count: parseInt(stream.viewer_count.replace(/,/g,'')),
+                        url: {afreeca: stream.url}
+                    });
+                }
+                setStreamsAfreeca(data);
+            } catch (error) {
+                console.error('Error fetching streams:', error);
+                // 에러 처리 로직을 추가하세요.
+            }
+        };
+
+
 
         fetchStreams();
         fetchStreamsCzz();
-
+        fetchStreamsAfreeca();
     }, []);
     
     useEffect(() => {
 
-        const data = streamsTW.concat(streamsCZZ);
+        const data = streamsTW.concat(streamsCZZ).concat(streamsAfreeca);
 
         // 만약 streams에 user_name이 중복되는 경우가 있다면, 중복을 제거하고 viewer_count를 합산.
-        
         for (let i = 0; i < data.length; i++) {
             for (let j = i+1; j < data.length; j++) {
                 if (data[i].user_name.replace(/ /g,'').includes(data[j].user_name.replace(/ /g,''))
                     || data[j].user_name.replace(/ /g,'').includes(data[i].user_name.replace(/ /g,''))
                     || data[i].title === data[j].title) {
                     data[i].viewer_count = (parseInt(data[i].viewer_count) + parseInt(data[j].viewer_count));
-                    data[i].platform.push(data[j].platform[0]);
+                    data[i].platform = new Array(...new Set(data[i].platform.concat(data[j].platform)));
                     data[i].url = {...data[i].url, ...data[j].url};
                     data.splice(j,1);
                 }
@@ -198,9 +224,8 @@ const Dashboard = () => {
         }
         // viewer_count를 기준으로 내림차순 정렬해주세요.
         data.sort((a,b) => b.viewer_count - a.viewer_count);
-
         setAddStreams(data);
-    }, [streamsTW, streamsCZZ]);
+    }, [streamsTW, streamsCZZ, streamsAfreeca]);
     
     const handleEnterSearch = (e) => {
         if (e.key === 'Enter') {
