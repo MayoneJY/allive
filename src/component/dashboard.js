@@ -66,8 +66,31 @@ const Dashboard = () => {
                 }
             }
             setStreamsTW(data);
-            // 현재는 트위치만 검색 가능
+
+            // const dataCZZ = [];
+            // const responseCZZ = await axios.get('https://api.mayonedev.com/chzzkSearch', {
+            //     params: {
+            //         keyword: refSearch.current.value
+            //     }
+            //     });
+            // for (const stream of responseCZZ.data.content.data) {
+            //     if (stream.liveTitle.includes(refSearch.current.value)) {
+            //         dataCZZ.push({
+            //             id: stream.channelId,
+            //             platform: ['chzzk'],
+            //             thumbnail_url: stream.channelImageUrl ? stream.channelImageUrl.replace('{type}','270') : null,
+            //             user_name: stream.channel.channelName,
+            //             title: stream.liveTitle,
+            //             game_name: (''+stream.liveCategory).replace(/_/g,' '),
+            //             viewer_count: stream.concurrentUserCount,
+            //         });
+            //     }
+            // }
+            // setStreamsCZZ(dataCZZ);
+
+            // 검색은 트위치만 가능
             setStreamsCZZ([]);
+
         }
         catch (error) {
             console.error('Error fetching streams:', error);
@@ -272,6 +295,11 @@ const Dashboard = () => {
         setSearch([].concat(result));
     }
 
+    const handleDeleteRecentSearch = () => {
+        localStorage.removeItem('search');
+        setSearch([]);
+    }
+
     // 최근 검색 내역
     const ViewRecentSearch = () => {
         return (
@@ -288,7 +316,8 @@ const Dashboard = () => {
                                         style={{fontSize:"12px", cursor: "default"}}>
                                         최근 검색어
                                     </div>
-                                    <div style={{fontSize:"12px", cursor: "pointer"}}>
+                                    <div style={{fontSize:"12px", cursor: "pointer"}}
+                                        onClick={(e)=>{e.stopPropagation();handleDeleteRecentSearch()}}>
                                         전체 삭제
                                     </div>
                                 </div>
